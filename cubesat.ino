@@ -23,7 +23,9 @@ void blinkLED(int max_count, int blink_duration)
 
 void setup()
 {
+#if defined(DEBUG_SERIAL)
   Serial.begin(115200);
+#endif
   Wire.begin();
   SPI.begin();
   pinMode(LED_BUILTIN, OUTPUT);
@@ -40,7 +42,7 @@ void setup()
       dataFile.println("arduinoclock,temperature,pressure,humidity,longitude,latitude,altitude,speed,direction,gpstime");
       dataFile.close();
 
-      Serial.println("Everything is initialized OK.");
+      SerialPrintln("Everything is initialized OK.");
       blinkLED(50, 200);
 
       current_time = millis();   
@@ -48,7 +50,7 @@ void setup()
   }
   else
   {
-    Serial.println("Something failed.");
+    SerialPrintln("Something failed.");
   }
 }
 

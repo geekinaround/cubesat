@@ -20,30 +20,30 @@ bool dumpImageToSD();
 
 bool initializeEnvShield()
 {
-  Serial.print("Initializing ENV shield...");
+  SerialPrint("Initializing ENV shield...");
   if (!ENV.begin()) {
-    Serial.println("Failed to initialize ENV shield");
+    SerialPrintln("Failed to initialize ENV shield");
     return false;
   }
-  Serial.println("ENV shield initialized.");
+  SerialPrintln("ENV shield initialized.");
 
-  Serial.print("Initializing SD card...");
+  SerialPrint("Initializing SD card...");
   if (!SD.begin(SD_CS_PIN)) {
-    Serial.println("SD card failed, or not present");
+    SerialPrintln("SD card failed, or not present");
     return false;
   }
-  Serial.println("SD card initialized.");
+  SerialPrintln("SD card initialized.");
   return true;
 }
 
 bool initializeGPSShield()
 {
-  Serial.print("Initializing GPS...");
+  SerialPrint("Initializing GPS...");
   if (!GPS.begin(GPS_MODE_I2C)) {
-    Serial.println("Failed to initialize GPS");
+    SerialPrintln("Failed to initialize GPS");
     return false;
   }
-  Serial.println("GPS initialized.");
+  SerialPrintln("GPS initialized.");
 
   bool led_state = LOW;
   unsigned long next_time = millis();
@@ -51,20 +51,20 @@ bool initializeGPSShield()
   {
     led_state = !led_state;
     digitalWrite(LED_BUILTIN, led_state);
-    Serial.println("Waiting for GPS satellite lock.");
+    SerialPrintln("Waiting for GPS satellite lock.");
     next_time += 1000;
     delayUntil(next_time);
   }
-  Serial.print("Got lock at ");
-  Serial.print(GPS.latitude(), 7);
-  Serial.print(", ");
-  Serial.println(GPS.longitude(), 7);
+  SerialPrint("Got lock at ");
+  SerialPrint2(GPS.latitude(), 7);
+  SerialPrint(", ");
+  SerialPrintln2(GPS.longitude(), 7);
   return true;
 }
 
 bool initializeCamera()
 {
-  Serial.println("ArduCAM Start!");
+  SerialPrintln("ArduCAM Start!");
 
   pinMode(CAMERA_CS_PIN, OUTPUT);
   digitalWrite(CAMERA_CS_PIN, HIGH);
@@ -83,11 +83,11 @@ bool initializeCamera()
     temp = camera.read_reg(ARDUCHIP_TEST1);
     if(temp == 0x55)
     {
-      Serial.println("SPI interface OK.");
+      SerialPrintln("SPI interface OK.");
     }
     else
     {
-      Serial.println("SPI interface Error!");
+      SerialPrintln("SPI interface Error!");
       delay(1000);
     }
   } while (temp != 0x55);
@@ -100,11 +100,11 @@ bool initializeCamera()
     camera.rdSensorReg16_8(OV5642_CHIPID_LOW, &pid);
     if (vid==0x56 && pid==0x42)
     {
-      Serial.println("OV5642 detected.");
+      SerialPrintln("OV5642 detected.");
     }
     else
     {
-      Serial.println("Can't find OV5642 module!");
+      SerialPrintln("Can't find OV5642 module!");
       delay(1000);
     }
   } while (vid!=0x56 || pid!=0x42);
@@ -145,12 +145,12 @@ bool dumpImageToSD()
   uint32_t length = camera.read_fifo_length();
   if (length >= MAX_FIFO_SIZE) //8M
   {
-    Serial.println("Over size.");
+    SerialPrintln("Over size.");
     return false;
   }
   if (length == 0)
   {
-    Serial.println("Size is 0.");
+    SerialPrintln("Size is 0.");
     return false;
   } 
 
@@ -211,7 +211,7 @@ bool dumpImageToSD()
       outFile = SD.open(filename, O_WRITE | O_CREAT | O_TRUNC);
       if (!outFile)
       {
-        Serial.println("File open failed");
+        SerialPrintln("File open failed");
         return false;
       }
       camera.CS_LOW();
