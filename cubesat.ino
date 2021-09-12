@@ -1,7 +1,13 @@
 #include <SPI.h>
 #include <Wire.h>
+#include <SD.h>
+#include <Arduino_MKRENV.h>
+#include <Arduino_MKRGPS.h>
+
 
 #include "helper.h"
+
+unsigned long current_time;
 
 
 void blinkLED(int max_count, int blink_duration)
@@ -26,8 +32,19 @@ void setup()
       initializeCamera()==true &&
       initializeGPSShield()==true)
   {
-    Serial.println("Everything is initialized OK.");
-    blinkLED(50, 200);
+    //from example SD datalogger 
+    File dataFile = SD.open("datalog.csv", FILE_WRITE);
+    // if the file is available, write to it:
+    if (dataFile)
+    {
+      dataFile.println("arduinoclock,temperature,pressure,humidity,longitude,latitude,altitude,speed,direction,gpstime");
+      dataFile.close();
+
+      Serial.println("Everything is initialized OK.");
+      blinkLED(50, 200);
+
+      current_time = millis();   
+    }
   }
   else
   {
@@ -37,7 +54,38 @@ void setup()
 
 
 void loop()
-{
-//  captureImage();
-//  delay(1000);
+{ 
+  current_time = current_time + 2000;
+  delayUntil(current_time);
+
+  //from example SD datalogger 
+  File dataFile = SD.open("datalog.csv", FILE_WRITE);
+  // if the file is available, write to it:
+  if (dataFile)
+  {
+    dataFile.print(millis());
+    dataFile.print(',');
+    //from example MKRENV ReadSensors
+    dataFile.print(ENV.readTemperature());
+    dataFile.print(',');
+    dataFile.print(ENV.readPressure());
+    dataFile.print(',');
+    dataFile.print(ENV.readHumidity());
+    dataFile.print(',');
+    dataFile.print(GPS.longitude(), 6);
+    dataFile.print(',');
+    // from example MKRGPS GPSlocation
+    dataFile.print(GPS.latitude(), 6);
+    dataFile.print(',');
+    dataFile.print(GPS.altitude());
+    dataFile.print(',');
+    dataFile.print(GPS.speed()); 
+    dataFile.print(',');
+    dataFile.print(GPS.course());
+    dataFile.print(',');
+    dataFile.println(GPS.getTime());
+    dataFile.close();
+  }
+  
+  captureImage();
 }
